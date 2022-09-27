@@ -10,12 +10,12 @@ class BaseImg {
 
 protected:
 	string file_path;
-
-public:
 	BaseImg();
 	BaseImg(string file, string location = "data/");
-	const string get_file_path() const;
 	~BaseImg();
+
+public:
+	const string get_file_path() const;
 };
 
 #endif

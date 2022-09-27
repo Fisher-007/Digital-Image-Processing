@@ -21,11 +21,24 @@ void test1() {
 
 // ≤‚ ‘Img¿‡
 void test2() {
-	Img img("hw1.bmp");
+	Img img("test.bmp");
+	img.DisplayImg();
+	img.SaveImg();
+}
+
+
+#include "processing.h"
+
+// ≤‚ ‘Processing¿‡
+void test3() {
+	Img img("test.bmp");
+	Processing tools;
+	tools.FourierTransform(img);
 }
 
 
 int main() {
 	// test1();
-	test2();
+	// test2();
+	test3();
 }

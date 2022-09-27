@@ -1,29 +1,26 @@
 #include "processing.h"
+#include "message.h"
 #include <opencv2/opencv.hpp>
-using namespace std;
 using namespace cv;
 
 
 Img Processing::FourierTransform(const Img& img)
 {
-	Mat mImage = imread(img.get_file_path(), 0);
-	if (mImage.data == 0)
-	{
-		cerr << "Image reading error" << endl;
-		system("pause");
-		exit(0);
+	Mat img_origin = imread(img.get_file_path(), 0);
+	if (img_origin.data == 0) {
+		ExitMessage("图像文件读取失败！");
 	}
-	namedWindow("The original image", WINDOW_NORMAL);
-	imshow("The original image", mImage);
+	// namedWindow("The original image", WINDOW_NORMAL);
+	// imshow("The original image", img_origin);
 
-	//Extending image
-	int m = getOptimalDFTSize(mImage.rows);
-	int n = getOptimalDFTSize(mImage.cols);
-	copyMakeBorder(mImage, mImage, 0, m - mImage.rows, 0, n - mImage.cols, BORDER_CONSTANT, Scalar(0));
+	// Extending image
+	int m = getOptimalDFTSize(img_origin.rows);
+	int n = getOptimalDFTSize(img_origin.cols);
+	copyMakeBorder(img_origin, img_origin, 0, m - img_origin.rows, 0, n - img_origin.cols, BORDER_CONSTANT, Scalar(0));
 
-	//Fourier transform
-	Mat mFourier(mImage.rows + m, mImage.cols + n, CV_32FC2, Scalar(0, 0));
-	Mat mForFourier[] = { Mat_<float>(mImage), Mat::zeros(mImage.size(), CV_32F) };
+	// Fourier transform
+	Mat mFourier(img_origin.rows + m, img_origin.cols + n, CV_32FC2, Scalar(0, 0));
+	Mat mForFourier[] = { Mat_<float>(img_origin), Mat::zeros(img_origin.size(), CV_32F) };
 	Mat mSrc;
 	merge(mForFourier, 2, mSrc);
 	dft(mSrc, mFourier);
@@ -45,12 +42,12 @@ Img Processing::FourierTransform(const Img& img)
 	//The normalized
 	normalize(mAmplitude, mAmplitude, 0, 255, NORM_MINMAX);
 
-	Mat mResult(mImage.rows, mImage.cols, CV_8UC1, Scalar(0));
-	for (int i = 0; i < mImage.rows; i++)
+	Mat mResult(img_origin.rows, img_origin.cols, CV_8UC1, Scalar(0));
+	for (int i = 0; i < img_origin.rows; i++)
 	{
 		uchar* pResult = mResult.ptr<uchar>(i);
 		float* pAmplitude = mAmplitude.ptr<float>(i);
-		for (int j = 0; j < mImage.cols; j++)
+		for (int j = 0; j < img_origin.cols; j++)
 		{
 			pResult[j] = (uchar)pAmplitude[j];
 		}
@@ -73,10 +70,20 @@ Img Processing::FourierTransform(const Img& img)
 	mQuadrant4.copyTo(mQuadrant2);
 	mChange2.copyTo(mQuadrant4);
 
-	namedWindow("The Fourier transform", WINDOW_NORMAL);
-	imshow("The Fourier transform", mResult);
-	waitKey();
-	destroyAllWindows();
+	// namedWindow("The Fourier transform", WINDOW_NORMAL);
+	// imshow("The Fourier transform", mResult);
+	// waitKey();
+	// destroyAllWindows();
+
+	vector<vector<uchar>> img_result;
+	vector<uchar> sub_img;
+	for (int i = 0; i < mResult.rows; ++i)
+		img_result[i] = sub_img;    // 容器直接赋值是深拷贝
+
+	for (int i = 0; i < img_origin.rows; ++i)
+		for (int j = 0; j < img_origin.cols; ++j)
+			img_result[i][j] = img_origin.at<uchar>(i, j);
+
 	return img;
 }
 

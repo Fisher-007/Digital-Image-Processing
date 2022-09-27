@@ -11,13 +11,7 @@
 *  Change History :                                                          *
 *  <Date>     | <Version> | <Author>       | <Description>                   *
 *----------------------------------------------------------------------------*
-*  2022/07/23 | 1.0       | Dong Yu        | Create File                     *
-*----------------------------------------------------------------------------*
-*  2022/07/23 | 1.1       | Dong Yu        | Update Comment                  *
-*----------------------------------------------------------------------------*
-*  2022/07/25 | 1.2       | Dong Yu        | Add iter message print          *
-*----------------------------------------------------------------------------*
-*  2022/07/30 | 2.0       | Dong Yu        | Code optimization               *
+*  2022/09/27 | 1.0       | Dong Yu        | Create File                     *
 *----------------------------------------------------------------------------*
 *                                                                            *
 *****************************************************************************/
@@ -26,13 +20,7 @@
 
 void StatusMessage(const string& message) {
 	// 后续在参数与格式方面可以继续拓展
-	cout << message << endl;
-}
-
-
-void StatusIter(const int& num, const int& len, const string& fill) {
-	// cout << "iter = " << setfill(fill) << setw(len) << num << ": ";
-	cout << "iter = " << num << ": ";
+	cout << message << "\n";
 }
 
 
@@ -43,18 +31,18 @@ void StatusMessageB(const string& message) {
 
 void StatusMessageA(const string& message) {
 	if (message == "")
-		cout << "Succeed!" << endl;
+		cout << "Succeed!" << "\n";
 	else
-		cout << message << endl;
+		cout << message << "\n";
 }
 
 
 void Warning(const string& message) {
-	cout << "Warning: " << message << endl;
+	cout << "Warning: " << message << "\n";
 }
 
 
 void ExitMessage(const string& message) {
-	cout << "Error: " << message << endl;
+	cout << "Error: " << message << "\n";
 	exit(EXIT_FAILURE);
 }
