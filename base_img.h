@@ -6,6 +6,9 @@
 using namespace std;
 
 
+typedef unsigned char uchar;
+
+
 class BaseImg {
 
 protected:
@@ -13,6 +16,7 @@ protected:
 	BaseImg();
 	BaseImg(string file, string location = "data/");
 	~BaseImg();
+	friend class Processing;
 
 public:
 	const string get_file_path() const;

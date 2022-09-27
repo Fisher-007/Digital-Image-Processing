@@ -1,17 +1,43 @@
 #include "processing.h"
 #include "message.h"
 #include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/utils/logger.hpp>
 using namespace cv;
 
 
-Img Processing::FourierTransform(const Img& img)
-{
+Img Processing::ConvertToImg(const Img& img, const Mat& result) {
+	Img output;
+	vector<uchar> sub_img;
+	vector<vector<uchar>> data;
+
+	for (int y = result.rows - 1; y >= 0; y--)
+		for (int x = 0; x < result.cols; x++) {
+
+			sub_img.clear();
+			sub_img.push_back(result.at<uchar>(y, x));
+			sub_img.push_back(result.at<uchar>(y, x));
+			sub_img.push_back(result.at<uchar>(y, x));
+
+			data.push_back(sub_img);
+		}
+
+	output.bmp_info.img_data = data;
+	output.bmp_info.bf = img.bmp_info.bf;
+	output.bmp_info.bi = img.bmp_info.bi;
+
+	return output;
+}
+
+
+Img Processing::FourierTransform(const Img& img) {
+	
+	setLogLevel(utils::logging::LOG_LEVEL_SILENT);
+
 	Mat img_origin = imread(img.get_file_path(), 0);
 	if (img_origin.data == 0) {
 		ExitMessage("图像文件读取失败！");
 	}
-	// namedWindow("The original image", WINDOW_NORMAL);
-	// imshow("The original image", img_origin);
 
 	// Extending image
 	int m = getOptimalDFTSize(img_origin.rows);
@@ -75,15 +101,6 @@ Img Processing::FourierTransform(const Img& img)
 	// waitKey();
 	// destroyAllWindows();
 
-	vector<vector<uchar>> img_result;
-	vector<uchar> sub_img;
-	for (int i = 0; i < mResult.rows; ++i)
-		img_result[i] = sub_img;    // 容器直接赋值是深拷贝
-
-	for (int i = 0; i < img_origin.rows; ++i)
-		for (int j = 0; j < img_origin.cols; ++j)
-			img_result[i][j] = img_origin.at<uchar>(i, j);
-
 	return img;
 }
 
@@ -92,5 +109,27 @@ Img Processing::FourierInverseTransform(const Img& img) {
 }
 
 Img Processing::HistogramEqualization(const Img& img) {
-	return img;
+
+	setLogLevel(utils::logging::LOG_LEVEL_SILENT);
+
+	// 目前只支持BMP文件
+	if (img.img_type != "bmp")
+		ExitMessage("目前不支持该图像格式！");
+
+	Mat img_origin = imread(img.file_path);
+	if (img_origin.empty()) {
+		ExitMessage("图像读取失败");
+	}
+
+	Mat gray, heq;
+	cvtColor(img_origin, gray, COLOR_BGR2GRAY);
+
+	equalizeHist(gray, heq);
+
+	return ConvertToImg(img, heq);
+}
+
+void Processing::DisplayEffect(const Img& img_origin, const Img& img_processed) {
+	img_origin.DisplayImg(0, 120);
+	img_processed.DisplayImg(img_origin.bmp_info.bi.biWidth + 10, 120);
 }

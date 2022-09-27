@@ -24,9 +24,11 @@ private:
 public:
 	Img();
 	Img(string file, string location = "data/");
+	// void get_img_info();
 	void LoadImg();
-	void DisplayImg() const;
+	void DisplayImg(int x_offset = 0, int y_offset = 120) const;
 	void SaveImg(string save_path = "") const;
+	friend class Processing;
 };
 
 #endif

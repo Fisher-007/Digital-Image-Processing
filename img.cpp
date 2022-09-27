@@ -31,10 +31,10 @@ void Img::LoadImg() {
 	}
 }
 
-void Img::DisplayImg() const {
+void Img::DisplayImg(int x_offset, int y_offset) const {
 	switch (img_type_set[this->img_type]) {
 	case BMP:
-		DisplayBmpImg();
+		DisplayBmpImg(x_offset, y_offset);
 		// TODO: 拓展其他类型
 		break;
 	}
