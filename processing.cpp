@@ -96,10 +96,14 @@ Img Processing::FourierTransform(const Img& img) {
 	mQuadrant4.copyTo(mQuadrant2);
 	mChange2.copyTo(mQuadrant4);
 
-	// namedWindow("The Fourier transform", WINDOW_NORMAL);
-	// imshow("The Fourier transform", mResult);
-	// waitKey();
-	// destroyAllWindows();
+	namedWindow("Origin Img", WINDOW_NORMAL);
+	imshow("Origin Img", img_origin);
+
+	namedWindow("The Fourier transform", WINDOW_NORMAL);
+	imshow("The Fourier transform", mResult);
+
+	waitKey();
+	destroyAllWindows();
 
 	return img;
 }
