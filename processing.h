@@ -19,11 +19,11 @@ public:
 	Img HistogramEqualization(const Img& img);
 	class GeometricTransform {
 	private:
-		//Img BilinearInterpolation();
+		vector<uchar> BilinearInterpolation(const Img& img, float x0, float y0);
 	public:
 		Img Mirror(const Img& img);
 		Img Rotation(const Img& img);
-		Img Scaling(const Img& img);
+		Img Scaling(const Img& img, float multiple);
 	} GeometricTransform;
 };
 
