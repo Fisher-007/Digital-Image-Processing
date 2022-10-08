@@ -20,6 +20,16 @@ void StatusMessageA(const string& message) {
 }
 
 
+void PrintHintMessageB(const string& message) {
+	cout << message << ": ";
+}
+
+
+void PrintHintMessageA(const string& message) {
+	cout << message;
+}
+
+
 void Warning(const string& message) {
 	cout << "Warning: " << message << "\n";
 }

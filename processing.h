@@ -7,9 +7,6 @@
 using cv::Mat;
 
 
-class Img;
-
-
 class Processing {
 
 private:
