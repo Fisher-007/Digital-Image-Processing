@@ -51,6 +51,7 @@ void test4() {
 	PrintHintMessageB("请输入需要处理的图片文件名");
 	cin >> file;
 	PrintHintMessageA();
+
 	Img img(file, location);
 	Processing tools;
 
@@ -60,6 +61,22 @@ void test4() {
 
 // 测试Processing类（几何变化部分）
 void test5() {
+	string location = "data/", file = "test.bmp";
+
+	//PrintHintMessageB("请输入图片所在文件夹地址（在代码同一目录data下可直接输入data/）");
+	//cin >> location;
+	//PrintHintMessageA();
+
+	//PrintHintMessageB("请输入需要处理的图片文件名");
+	//cin >> file;
+	//PrintHintMessageA();
+
+	Img img(file, location);
+	Processing tools;
+
+	// Mirror
+	tools.DisplayEffect(img, tools.GeometricTransform.Mirror(img));
+
 }
 
 
@@ -69,7 +86,7 @@ int main() {
 	// test1();
 	// test2();
 	// test3();
-	test4();
+	test5();
 
     // TODO: 暂停，system("pause");
 }

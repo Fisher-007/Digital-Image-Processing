@@ -137,3 +137,34 @@ void Processing::DisplayEffect(const Img& img_origin, const Img& img_processed) 
 	img_origin.DisplayImg(0, 120);
 	img_processed.DisplayImg(img_origin.bmp_info.bi.biWidth + 10, 120);
 }
+
+Img Processing::GeometricTransform::Mirror(const Img& img) {
+
+	vector<vector<uchar>> img_data(img.bmp_info.bi.biHeight * img.bmp_info.bi.biWidth);
+	for (int i = 0; i < img_data.size(); i++)
+		img_data[i].resize(3);
+
+	int x1, y1;
+	for (int y = 0; y < img.bmp_info.bi.biHeight; y++) {
+		for (int x = 0; x < img.bmp_info.bi.biWidth; x++) {
+			x1 = img.bmp_info.bi.biWidth - x - 1;
+			y1 = y;
+			img_data[y1 * img.bmp_info.bi.biWidth + x1] = img.bmp_info.img_data[y * img.bmp_info.bi.biWidth + x];
+		}
+	}
+
+	Img output;
+	output.bmp_info.img_data = img_data;
+	output.bmp_info.bf = img.bmp_info.bf;
+	output.bmp_info.bi = img.bmp_info.bi;
+
+	return output;
+}
+
+Img Processing::GeometricTransform::Rotation(const Img& img) {
+	return img;
+}
+
+Img Processing::GeometricTransform::Scaling(const Img& img) {
+	return img;
+}
