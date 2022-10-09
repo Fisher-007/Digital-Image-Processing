@@ -5,6 +5,8 @@
 #include <opencv2/core/utils/logger.hpp>
 using namespace cv;
 
+#define PI 3.1415926
+
 
 Img Processing::ConvertToImg(const Img& img, const Mat& result) {
 	Img output;
@@ -194,8 +196,48 @@ Img Processing::GeometricTransform::Mirror(const Img& img) {
 	return output;
 }
 
-Img Processing::GeometricTransform::Rotation(const Img& img) {
-	return img;
+Img Processing::GeometricTransform::Rotation(const Img& img, float angle, int rx, int ry) {
+
+	if (rx == -1)
+		rx = round(img.bmp_info.bi.biWidth / 2);
+	if (ry == -1)
+		ry = round(img.bmp_info.bi.biHeight / 2);
+
+	vector<vector<uchar>> img_data(img.bmp_info.bi.biHeight * img.bmp_info.bi.biWidth);
+	for (int i = 0; i < img_data.size(); i++)
+		img_data[i].resize(3, 0);
+
+	int x1, y1;
+	for (int y = 0; y < img.bmp_info.bi.biHeight; y++) {
+		for (int x = 0; x < img.bmp_info.bi.biWidth; x++) {
+
+			x1 = round(cos(angle * PI / 180) * (x - rx) + sin(angle * PI / 180) * (y - ry) + rx);
+			y1 = round( - sin(angle * PI / 180) * (x - rx) + cos(angle * PI / 180) * (y - ry) + ry);
+
+			if (x1 >= 0 && x1 < img.bmp_info.bi.biWidth && y1 >= 0 && y1 < img.bmp_info.bi.biHeight)
+				img_data[y1 * img.bmp_info.bi.biWidth + x1] = img.bmp_info.img_data[y * img.bmp_info.bi.biWidth + x];
+		}
+	}
+
+	float x0, y0;
+	for (int y = 0; y < img.bmp_info.bi.biHeight; y++) {
+		for (int x = 0; x < img.bmp_info.bi.biWidth; x++) {
+
+			x0 = cos(angle * PI / 180) * (x - rx) - sin(angle * PI / 180) * (y - ry) + rx;
+			y0 = sin(angle * PI / 180) * (x - rx) + cos(angle * PI / 180) * (y - ry) + ry;
+
+			if (x0 >= 0 && x0 <= img.bmp_info.bi.biWidth - 1 && y0 >= 0 && y0 <= img.bmp_info.bi.biHeight - 1)
+				if (img_data[y * img.bmp_info.bi.biWidth + x][0] == img_data[y * img.bmp_info.bi.biWidth + x][1] == img_data[y * img.bmp_info.bi.biWidth + x][2] == 0)
+					img_data[y * img.bmp_info.bi.biWidth + x] = BilinearInterpolation(img, x0, y0);
+		}
+	}
+
+	Img output;
+	output.bmp_info.img_data = img_data;
+	output.bmp_info.bf = img.bmp_info.bf;
+	output.bmp_info.bi = img.bmp_info.bi;
+
+	return output;
 }
 
 Img Processing::GeometricTransform::Scaling(const Img& img, float multiple) {

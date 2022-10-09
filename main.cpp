@@ -78,12 +78,14 @@ void test5() {
 	// tools.DisplayEffect(img, tools.GeometricTransform.Mirror(img));
 
 	// Scaling
-	PrintHintMessageB("请输入放缩倍数（等比例放缩）");
-	float multiple;
-	cin >> multiple;
-	PrintHintMessageA();
-	tools.DisplayEffect(img, tools.GeometricTransform.Scaling(img, multiple));
+	//PrintHintMessageB("请输入放缩倍数（等比例放缩）");
+	//float multiple;
+	//cin >> multiple;
+	//PrintHintMessageA();
+	//tools.DisplayEffect(img, tools.GeometricTransform.Scaling(img, multiple));
 
+	// Rotation
+	tools.DisplayEffect(img, tools.GeometricTransform.Rotation(img, -30));
 }
 
 
