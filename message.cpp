@@ -30,6 +30,9 @@ void PrintHintMessageA(const string& message) {
 }
 
 
+void SetArg() {}
+
+
 void Warning(const string& message) {
 	cout << "Warning: " << message << "\n";
 }

@@ -6,8 +6,10 @@
 #include <iostream>
 #include <string>
 #include <iomanip>
+#include <cstdarg>
 using std::string;
 using std::cout;
+using std::cin;
 
 
 // 打印一般文字信息
@@ -21,6 +23,22 @@ void StatusMessageA(const string& message = "");
 void PrintHintMessageB(const string& message);
 // 打印交互提示信息，无特殊需要默认为'\n'
 void PrintHintMessageA(const string& message = "\n");
+
+// 打印交互提示并提取输入信息
+void SetArg();
+
+template <typename T, typename... U>
+void SetArg(T& first, U&...args) {
+	cin >> first;
+	SetArg(args...);
+}
+
+template <typename T, typename... U>
+void InputMessage(const string& message, T& first, U&...args) {
+	PrintHintMessageB(message);
+	SetArg(first, args...);
+	PrintHintMessageA();
+}
 
 // 打印警告信息
 void Warning(const string& message);

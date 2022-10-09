@@ -43,19 +43,8 @@ void test3() {
 // 测试用户交互
 void test4() {
 	string location = "data/", file;
-
-	PrintHintMessageB("请输入图片所在文件夹地址（在代码同一目录data下可直接输入data/）");
-	cin >> location;
-	PrintHintMessageA();
-
-	PrintHintMessageB("请输入需要处理的图片文件名");
-	cin >> file;
-	PrintHintMessageA();
-
-	Img img(file, location);
-	Processing tools;
-
-	tools.DisplayEffect(img, tools.HistogramEqualization(img));
+	InputMessage("hello world", location, file);
+	cout << location + file << endl;
 }
 
 
@@ -85,7 +74,7 @@ void test5() {
 	//tools.DisplayEffect(img, tools.GeometricTransform.Scaling(img, multiple));
 
 	// Rotation
-	tools.DisplayEffect(img, tools.GeometricTransform.Rotation(img, -30));
+	tools.DisplayEffect(img, tools.GeometricTransform.Rotation(img, -30, 10, 100));
 }
 
 
@@ -95,7 +84,7 @@ int main() {
 	// test1();
 	// test2();
 	// test3();
-	test5();
+	test4();
 
     // TODO: 暂停，system("pause");
 }
