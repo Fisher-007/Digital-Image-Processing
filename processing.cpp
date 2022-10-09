@@ -136,8 +136,9 @@ Img Processing::HistogramEqualization(const Img& img) {
 }
 
 void Processing::DisplayEffect(const Img& img_origin, const Img& img_processed) {
-	img_origin.DisplayImg(0, 120);
-	img_processed.DisplayImg(img_origin.bmp_info.bi.biWidth + 10, 120);
+	// TODO: 自动调整位置
+	img_origin.DisplayImg(0, 180);
+	img_processed.DisplayImg(img_origin.bmp_info.bi.biWidth + 10, 180);
 }
 
 vector<uchar> Processing::GeometricTransform::BilinearInterpolation(const Img& img, float x0, float y0) {
@@ -253,17 +254,17 @@ Img Processing::GeometricTransform::Scaling(const Img& img, float multiple) {
 	int x1, y1;
 	for (int y = 0; y < img.bmp_info.bi.biHeight; y++) {
 
-		if (y == img.bmp_info.bi.biHeight - 1)
+		y1 = round(multiple * y);
+
+		if (y == img.bmp_info.bi.biHeight - 1 || y1 > height - 1)
 			y1 = height - 1;
-		else
-			y1 = round(multiple * y);
 
 		for (int x = 0; x < img.bmp_info.bi.biWidth; x++) {
 
-			if (x == img.bmp_info.bi.biWidth - 1)
+			x1 = round(multiple * x);
+
+			if (x == img.bmp_info.bi.biWidth - 1 || x1 > width - 1)
 				x1 = width - 1;
-			else
-				x1 = round(multiple * x);
 
 			img_data[y1 * width + x1] = img.bmp_info.img_data[y * img.bmp_info.bi.biWidth + x];
 		}
@@ -275,15 +276,14 @@ Img Processing::GeometricTransform::Scaling(const Img& img, float multiple) {
 			for (int x = 0; x < width; x++) {
 				if (img_data[y * width + x][0] == img_data[y * width + x][1] == img_data[y * width + x][2] == 0) {
 
-					if (y == height - 1)
-						y0 = img.bmp_info.bi.biHeight - 1;
-					else
-						y0 = y / multiple;
+					y0 = y / multiple;
+					x0 = x / multiple;
 
-					if (x == width - 1)
+					if (y == height - 1 || y0 > img.bmp_info.bi.biHeight - 1)
+						y0 = img.bmp_info.bi.biHeight - 1;
+
+					if (x == width - 1 || x0 > img.bmp_info.bi.biWidth - 1)
 						x0 = img.bmp_info.bi.biWidth - 1;
-					else
-						x0 = x / multiple;
 
 					img_data[y * width + x] = BilinearInterpolation(img, x0, y0);
 				}
