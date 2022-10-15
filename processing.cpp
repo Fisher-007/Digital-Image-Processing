@@ -42,16 +42,15 @@ Img Processing::FourierTransform(const Img& img) {
 	}
 
 	// Extending image
-	int m = getOptimalDFTSize(img_origin.rows);
-	int n = getOptimalDFTSize(img_origin.cols);
-	copyMakeBorder(img_origin, img_origin, 0, m - img_origin.rows, 0, n - img_origin.cols, BORDER_CONSTANT, Scalar(0));
+	int dm = getOptimalDFTSize(img_origin.rows) - img_origin.rows;
+	int dn = getOptimalDFTSize(img_origin.cols) - img_origin.cols;
+	copyMakeBorder(img_origin, img_origin, 0, dm, 0, dn, BORDER_CONSTANT, Scalar(0));
 
 	// Fourier transform
-	Mat mFourier(img_origin.rows + m, img_origin.cols + n, CV_32FC2, Scalar(0, 0));
+	Mat mFourier;
 	Mat mForFourier[] = { Mat_<float>(img_origin), Mat::zeros(img_origin.size(), CV_32F) };
-	Mat mSrc;
-	merge(mForFourier, 2, mSrc);
-	dft(mSrc, mFourier);
+	merge(mForFourier, 2, mFourier);
+	dft(mFourier, mFourier);
 
 	//channels[0] is the real part of Fourier transform,channels[1] is the imaginary part of Fourier transform 
 	vector<Mat> channels;
@@ -81,33 +80,29 @@ Img Processing::FourierTransform(const Img& img) {
 		}
 	}
 
+	mResult = mResult(Rect(0, 0, mResult.cols - dn, mResult.rows - dm));
 	Mat mQuadrant1 = mResult(Rect(mResult.cols / 2, 0, mResult.cols / 2, mResult.rows / 2));
 	Mat mQuadrant2 = mResult(Rect(0, 0, mResult.cols / 2, mResult.rows / 2));
 	Mat mQuadrant3 = mResult(Rect(0, mResult.rows / 2, mResult.cols / 2, mResult.rows / 2));
 	Mat mQuadrant4 = mResult(Rect(mResult.cols / 2, mResult.rows / 2, mResult.cols / 2, mResult.rows / 2));
 
 	Mat mChange1 = mQuadrant1.clone();
-	//mQuadrant1 = mQuadrant3.clone();
-	//mQuadrant3 = mChange1.clone();
 	mQuadrant3.copyTo(mQuadrant1);
 	mChange1.copyTo(mQuadrant3);
-
 	Mat mChange2 = mQuadrant2.clone();
-	//mQuadrant2 = mQuadrant4.clone();
-	//mQuadrant4 = mChange2.clone();
 	mQuadrant4.copyTo(mQuadrant2);
 	mChange2.copyTo(mQuadrant4);
 
-	namedWindow("Origin Img", WINDOW_NORMAL);
-	imshow("Origin Img", img_origin);
+	//namedWindow("Origin Img2", WINDOW_NORMAL);
+	//imshow("Origin Img2", img_origin);
 
-	namedWindow("The Fourier transform", WINDOW_NORMAL);
-	imshow("The Fourier transform", mResult);
+	//namedWindow("The Fourier transform", WINDOW_NORMAL);
+	//imshow("The Fourier transform", mResult);
 
-	waitKey();
-	destroyAllWindows();
+	//waitKey();
+	//destroyAllWindows();
 
-	return img;
+	return ConvertToImg(img, mResult);
 }
 
 Img Processing::FourierInverseTransform(const Img& img) {

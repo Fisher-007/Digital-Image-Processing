@@ -33,8 +33,8 @@ void test2() {
 void test3() {
 	Img img("test.bmp");
 	Processing tools;
-	tools.FourierTransform(img);
-	tools.DisplayEffect(img, tools.HistogramEqualization(img));
+	tools.DisplayEffect(img, tools.FourierTransform(img));
+	// tools.DisplayEffect(img, tools.HistogramEqualization(img));
 }
 
 
@@ -111,10 +111,10 @@ int main() {
 
 	// test1();
 	// test2();
-	// test3();
+	test3();
 	// test4();
 	// test5();
-	test6();
+	// test6();
 
     // TODO: ÔÝÍ££¬system("pause");
 }
