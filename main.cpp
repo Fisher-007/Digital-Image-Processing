@@ -33,8 +33,10 @@ void test2() {
 void test3() {
 	Img img("test.bmp");
 	Processing tools;
-	tools.DisplayEffect(img, tools.FourierTransform(img));
+	// tools.DisplayEffect(img, tools.FourierTransform(img));
 	// tools.DisplayEffect(img, tools.HistogramEqualization(img));
+	tools.Fourier.FourierTransform(img);
+	tools.DisplayEffect(img, tools.Fourier.FourierInverseTransform(img));
 }
 
 

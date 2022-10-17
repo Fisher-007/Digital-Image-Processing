@@ -10,13 +10,24 @@ using cv::Mat;
 class Processing {
 
 private:
-	Img ConvertToImg(const Img& img, const Mat& result);
+	static Img ConvertToImg(const Img& img, const Mat& result);
 
 public:
 	void DisplayEffect(const Img& img_origin, const Img& img_processed);
-	Img FourierTransform(const Img& img);
-	Img FourierInverseTransform(const Img& img);
+
+	class Fourier {
+	private:
+		int dm;
+		int dn;
+		Mat mResult;
+		Mat spectrogram;
+	public:
+		Img FourierTransform(const Img& img);
+		Img FourierInverseTransform(const Img& img);
+	} Fourier;
+
 	Img HistogramEqualization(const Img& img);
+
 	class GeometricTransform {
 	private:
 		vector<uchar> BilinearInterpolation(const Img& img, float x0, float y0);

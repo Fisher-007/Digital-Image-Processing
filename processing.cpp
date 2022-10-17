@@ -31,8 +31,7 @@ Img Processing::ConvertToImg(const Img& img, const Mat& result) {
 	return output;
 }
 
-
-Img Processing::FourierTransform(const Img& img) {
+Img Processing::Fourier::FourierTransform(const Img& img) {
 	
 	setLogLevel(utils::logging::LOG_LEVEL_SILENT);
 
@@ -42,19 +41,20 @@ Img Processing::FourierTransform(const Img& img) {
 	}
 
 	// Extending image
-	int dm = getOptimalDFTSize(img_origin.rows) - img_origin.rows;
-	int dn = getOptimalDFTSize(img_origin.cols) - img_origin.cols;
+	dm = getOptimalDFTSize(img_origin.rows) - img_origin.rows;
+	dn = getOptimalDFTSize(img_origin.cols) - img_origin.cols;
 	copyMakeBorder(img_origin, img_origin, 0, dm, 0, dn, BORDER_CONSTANT, Scalar(0));
 
 	// Fourier transform
-	Mat mFourier;
 	Mat mForFourier[] = { Mat_<float>(img_origin), Mat::zeros(img_origin.size(), CV_32F) };
-	merge(mForFourier, 2, mFourier);
-	dft(mFourier, mFourier);
+	merge(mForFourier, 2, this->mResult);
+	dft(this->mResult, this->mResult);
+	// cout << typeid(*mResult.data).name() << endl;
+	// cout << this->mResult.type() << endl;
 
 	//channels[0] is the real part of Fourier transform,channels[1] is the imaginary part of Fourier transform 
 	vector<Mat> channels;
-	split(mFourier, channels);
+	split(this->mResult, channels);
 	Mat mRe = channels[0];
 	Mat mIm = channels[1];
 
@@ -69,10 +69,10 @@ Img Processing::FourierTransform(const Img& img) {
 	//The normalized
 	normalize(mAmplitude, mAmplitude, 0, 255, NORM_MINMAX);
 
-	Mat mResult(img_origin.rows, img_origin.cols, CV_8UC1, Scalar(0));
+	this->spectrogram =  Mat(img_origin.rows, img_origin.cols, CV_8UC1, Scalar(0));
 	for (int i = 0; i < img_origin.rows; i++)
 	{
-		uchar* pResult = mResult.ptr<uchar>(i);
+		uchar* pResult = this->spectrogram.ptr<uchar>(i);
 		float* pAmplitude = mAmplitude.ptr<float>(i);
 		for (int j = 0; j < img_origin.cols; j++)
 		{
@@ -80,11 +80,12 @@ Img Processing::FourierTransform(const Img& img) {
 		}
 	}
 
-	mResult = mResult(Rect(0, 0, mResult.cols - dn, mResult.rows - dm));
-	Mat mQuadrant1 = mResult(Rect(mResult.cols / 2, 0, mResult.cols / 2, mResult.rows / 2));
-	Mat mQuadrant2 = mResult(Rect(0, 0, mResult.cols / 2, mResult.rows / 2));
-	Mat mQuadrant3 = mResult(Rect(0, mResult.rows / 2, mResult.cols / 2, mResult.rows / 2));
-	Mat mQuadrant4 = mResult(Rect(mResult.cols / 2, mResult.rows / 2, mResult.cols / 2, mResult.rows / 2));
+	this->spectrogram = this->spectrogram(Rect(0, 0, this->spectrogram.cols - dn, this->spectrogram.rows - dm));
+
+	Mat mQuadrant1 = this->spectrogram(Rect(this->spectrogram.cols / 2, 0, this->spectrogram.cols / 2, this->spectrogram.rows / 2));
+	Mat mQuadrant2 = this->spectrogram(Rect(0, 0, this->spectrogram.cols / 2, this->spectrogram.rows / 2));
+	Mat mQuadrant3 = this->spectrogram(Rect(0, this->spectrogram.rows / 2, this->spectrogram.cols / 2, this->spectrogram.rows / 2));
+	Mat mQuadrant4 = this->spectrogram(Rect(this->spectrogram.cols / 2, this->spectrogram.rows / 2, this->spectrogram.cols / 2, this->spectrogram.rows / 2));
 
 	Mat mChange1 = mQuadrant1.clone();
 	mQuadrant3.copyTo(mQuadrant1);
@@ -93,20 +94,19 @@ Img Processing::FourierTransform(const Img& img) {
 	mQuadrant4.copyTo(mQuadrant2);
 	mChange2.copyTo(mQuadrant4);
 
-	//namedWindow("Origin Img2", WINDOW_NORMAL);
-	//imshow("Origin Img2", img_origin);
-
-	//namedWindow("The Fourier transform", WINDOW_NORMAL);
-	//imshow("The Fourier transform", mResult);
-
-	//waitKey();
-	//destroyAllWindows();
-
-	return ConvertToImg(img, mResult);
+	return ConvertToImg(img, this->spectrogram);
 }
 
-Img Processing::FourierInverseTransform(const Img& img) {
-	return img;
+Img Processing::Fourier::FourierInverseTransform(const Img& img) {
+	Mat result;
+
+	idft(this->mResult, result, DFT_REAL_OUTPUT);
+	normalize(result, result, 0, 1, NORM_MINMAX); // TODO: 无法100%还原？&& 32F颜色显示问题？
+
+	result.convertTo(result, CV_8U, 255.0);
+	result = result(Rect(0, 0, result.cols - dn, result.rows - dm));
+
+	return ConvertToImg(img, result);
 }
 
 Img Processing::HistogramEqualization(const Img& img) {
