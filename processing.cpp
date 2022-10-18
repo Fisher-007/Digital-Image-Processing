@@ -455,3 +455,120 @@ Img Processing::GeometricTransform::Scaling(const Img& img, float multiple) {
 
 	return output;
 }
+
+
+void saltAndPepper(Mat& image, int n) {
+	for (int k = 0; k < n; ++k) {
+		//随机确定图像中位置
+		int i, j;
+		i = rand() % image.cols;//取余数运算，保证在图像的列数内
+		j = rand() % image.rows;//取余数运算，保证在图像的行数内
+		int write_black = rand() % 2;//判定为白色噪声还是黑色噪声的变量
+		if (write_black == 0) {//添加白色噪声
+			if (image.type() == CV_8UC1) {//处理灰度图像
+				image.at<uchar>(j, i) = 255;//白色噪声
+			}
+			else if (image.type() == CV_8UC3) {//处理彩色图像
+				image.at<Vec3b>(j, i)[0] = 255;//Vec3b为opencv定义的3个值的向量类型
+				image.at<Vec3b>(j, i)[1] = 255;//[]制定通道，B:0,G:1,R:2
+				image.at<Vec3b>(j, i)[2] = 255;
+			}
+		}
+		else {//添加黑噪声
+			if (image.type() == CV_8UC1) {
+				image.at<uchar>(j, i) = 0;
+			}
+			else if (image.type() == CV_8UC3) {
+				image.at<Vec3b>(j, i)[0] = 0;//Vec3b为opencv定义的3个值的向量类型
+				image.at<Vec3b>(j, i)[1] = 0;//[]制定通道，B:0,G:1,R:2
+				image.at<Vec3b>(j, i)[2] = 0;
+			}
+		}
+	}
+}
+
+
+//实现滤波函数
+void AdaptiveLocalNoiseReductionFilter(Mat img_input, Mat& img_output, int m, int n)
+{
+	img_output = img_input.clone();
+	Mat sortarray(1, m * n, CV_8U);  //局部像素灰度矩阵
+
+	//1、为了保证图像的边缘也能够被滤波，这里首先扩展图像边缘，扩展方法为镜像
+	copyMakeBorder(img_input, img_input, (m - 1) / 2, (m - 1) / 2, (n - 1) / 2, (n - 1) / 2, BORDER_REFLECT);
+
+	//2、计算图像方差
+	Mat mat_mean1, mat_stddev1, mat_mean2, mat_stddev2; //图像均值标准差矩阵，局部均值标准差矩阵
+	meanStdDev(img_input, mat_mean1, mat_stddev1); //meanStdDev获取矩阵的平均值和标准差
+	double stddev1, mean2, stddev2;  //图像标准差，局部均值和标准差
+	stddev1 = mat_stddev1.at<double>(0, 0);//图像标准差
+
+
+	//3、自适应局部降噪滤波
+	for (int i = (m - 1) / 2; i < img_input.rows - (m - 1) / 2; i++)
+	{
+		for (int j = (n - 1) / 2; j < img_input.cols - (n - 1) / 2; j++)
+		{
+			int h = 0;
+			for (int x = -(m - 1) / 2; x <= (m - 1) / 2; x++)
+			{
+				for (int y = -(n - 1) / 2; y <= (n - 1) / 2; y++)
+				{
+					sortarray.at<uchar>(h) = img_input.at<uchar>(i + x, j + y);
+					h++;
+				}
+			}
+
+			//计算局部均值和方差
+			meanStdDev(sortarray, mat_mean2, mat_stddev2);
+			stddev2 = mat_stddev2.at<double>(0, 0);  //局部标准差
+			mean2 = mat_mean2.at<double>(0, 0);  //局部均值
+
+			//滤波器
+			double k = (stddev1 * stddev1) / (stddev2 * stddev2 + 0.00001);
+			if (k <= 1)
+			{
+				img_output.at<uchar>(i - (m - 1) / 2, j - (n - 1) / 2) = img_input.at<uchar>(i, j) - k * (img_input.at<uchar>(i, j) - mean2);
+			}
+			else
+			{
+				img_output.at<uchar>(i - (m - 1) / 2, j - (n - 1) / 2) = mean2;
+			}
+		}
+	}
+}
+
+
+Mat mediaFilter(const Mat& src, int ksize = 3) {
+	Mat dst;
+	medianBlur(src, dst, ksize);
+	return dst;
+}
+
+
+int main2()
+{
+	Mat image, image_gray, image_output;   //定义输入图像，灰度图像，输出图像
+	image = imread("data/test.bmp");  //读取图像；
+	if (image.empty())
+	{
+		cout << "读取错误" << endl;
+		return -1;
+	}
+	imshow("image", image);
+
+	saltAndPepper(image, 10000);
+
+	//转换为灰度图像
+	cvtColor(image, image_gray, COLOR_BGR2GRAY);
+
+	mediaFilter(image_gray);
+	imshow("media filter", image_gray);
+
+	//自己编写的滤波函数
+	AdaptiveLocalNoiseReductionFilter(image_gray, image_output, 3, 3);
+	imshow("adaptive media filter", image_output);
+
+	waitKey(0);  //暂停，保持图像显示，等待按键结束
+	return 0;
+}

@@ -46,4 +46,13 @@ public:
 };
 
 
+// 椒盐噪声
+void saltAndPepper(Mat& image, int n);
+
+// 自适应中值滤波
+void AdaptiveLocalNoiseReductionFilter(Mat img_input, Mat& img_output, int m, int n); //输入图像，输出图像，m,n为滤波器大小。
+
+int main2();
+
+
 #endif

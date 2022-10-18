@@ -125,7 +125,8 @@ int main() {
 	// test4();
 	// test5();
 	// test6();
-	test7();
+	// test7();
+	main2();
 
     // TODO: ÔİÍ££¬system("pause");
 }
