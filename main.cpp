@@ -108,15 +108,24 @@ void test6() {
 }
 
 
+// 测试Processing类（同态滤波）
+void test7() {
+	Img img("test.bmp");
+	Processing tools;
+	tools.DisplayEffect(img, tools.HomomorphicFilter(img));
+}
+
+
 int main() {
 	// TODO: 控制黑窗口大小
 
 	// test1();
 	// test2();
-	test3();
+	// test3();
 	// test4();
 	// test5();
 	// test6();
+	test7();
 
     // TODO: 暂停，system("pause");
 }

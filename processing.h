@@ -21,12 +21,17 @@ public:
 		int dn;
 		Mat mResult;
 		Mat spectrogram;
+		void FourierTransform(Mat& img_origin, int mode);
+		void FourierInverseTransform(Mat& result);
+		// TODO: 异常处理机制 
 	public:
 		Img FourierTransform(const Img& img);
 		Img FourierInverseTransform(const Img& img);
+		friend class Processing;
 	} Fourier;
 
 	Img HistogramEqualization(const Img& img);
+	Img HomomorphicFilter(const Img& img);
 
 	class GeometricTransform {
 	private:
@@ -36,6 +41,8 @@ public:
 		Img Rotation(const Img& img, float angle, int rx = -1, int ry = -1);
 		Img Scaling(const Img& img, float multiple);
 	} GeometricTransform;
+
+	// TODO: 颜色&&多通道拓展
 };
 
 

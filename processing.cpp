@@ -98,6 +98,8 @@ Img Processing::Fourier::FourierTransform(const Img& img) {
 }
 
 Img Processing::Fourier::FourierInverseTransform(const Img& img) {
+	// TODO: 处理输入的频域图
+
 	Mat result;
 
 	idft(this->mResult, result, DFT_REAL_OUTPUT);
@@ -107,6 +109,98 @@ Img Processing::Fourier::FourierInverseTransform(const Img& img) {
 	result = result(Rect(0, 0, result.cols - dn, result.rows - dm));
 
 	return ConvertToImg(img, result);
+}
+
+void Processing::Fourier::FourierTransform(Mat& img_origin, int mode) {
+
+	setLogLevel(utils::logging::LOG_LEVEL_SILENT);
+
+	// Extending image
+	dm = getOptimalDFTSize(img_origin.rows) - img_origin.rows;
+	dn = getOptimalDFTSize(img_origin.cols) - img_origin.cols;
+	copyMakeBorder(img_origin, img_origin, 0, dm, 0, dn, BORDER_CONSTANT, Scalar(0));
+
+	// Fourier transform
+	Mat mForFourier[] = { Mat_<float>(img_origin), Mat::zeros(img_origin.size(), CV_32F) };
+	merge(mForFourier, 2, this->mResult);
+	dft(this->mResult, this->mResult);
+
+	//channels[0] is the real part of Fourier transform,channels[1] is the imaginary part of Fourier transform 
+	vector<Mat> channels;
+	split(this->mResult, channels);
+	Mat mRe = channels[0];
+	Mat mIm = channels[1];
+
+	//Calculate the amplitude
+	Mat mAmplitude;
+	magnitude(mRe, mIm, mAmplitude);
+
+	//Logarithmic scale
+	log(mAmplitude + 1, mAmplitude);
+
+	//The normalized
+	normalize(mAmplitude, mAmplitude, 0, 255, NORM_MINMAX);
+
+	this->spectrogram = Mat(img_origin.rows, img_origin.cols, CV_8UC1, Scalar(0));
+	for (int i = 0; i < img_origin.rows; i++)
+	{
+		uchar* pResult = this->spectrogram.ptr<uchar>(i);
+		float* pAmplitude = mAmplitude.ptr<float>(i);
+		for (int j = 0; j < img_origin.cols; j++)
+		{
+			pResult[j] = (uchar)pAmplitude[j];
+		}
+	}
+
+	this->spectrogram = this->spectrogram(Rect(0, 0, this->spectrogram.cols - dn, this->spectrogram.rows - dm));
+
+	int cx = this->spectrogram.cols / 2;
+	int cy = this->spectrogram.rows / 2;
+
+	Mat mQuadrant1 = this->spectrogram(Rect(cx, 0, cx, cy));
+	Mat mQuadrant2 = this->spectrogram(Rect(0, 0, cx, cy));
+	Mat mQuadrant3 = this->spectrogram(Rect(0, cy, cx, cy));
+	Mat mQuadrant4 = this->spectrogram(Rect(cx, cy, cx, cy));
+
+	Mat mChange1 = mQuadrant1.clone();
+	mQuadrant3.copyTo(mQuadrant1);
+	mChange1.copyTo(mQuadrant3);
+	Mat mChange2 = mQuadrant2.clone();
+	mQuadrant4.copyTo(mQuadrant2);
+	mChange2.copyTo(mQuadrant4);
+
+	//if (mode == 1) {
+
+	//	Mat tmp;
+
+	//	Mat q00(mRe, Rect(0, 0, cx, cy));   // 左上区域
+	//	Mat q01(mRe, Rect(cx, 0, cx, cy));  // 右上区域
+	//	Mat q02(mRe, Rect(0, cy, cx, cy));  // 左下区域
+	//	Mat q03(mRe, Rect(cx, cy, cx, cy)); // 右下区域
+	//	q00.copyTo(tmp); q03.copyTo(q00); tmp.copyTo(q03);//左上与右下进行交换
+	//	q01.copyTo(tmp); q02.copyTo(q01); tmp.copyTo(q02);//右上与左下进行交换
+
+	//	Mat q10(mIm, Rect(0, 0, cx, cy));   // 左上区域
+	//	Mat q11(mIm, Rect(cx, 0, cx, cy));  // 右上区域
+	//	Mat q12(mIm, Rect(0, cy, cx, cy));  // 左下区域
+	//	Mat q13(mIm, Rect(cx, cy, cx, cy)); // 右下区域
+	//	q10.copyTo(tmp); q13.copyTo(q10); tmp.copyTo(q13);//左上与右下进行交换
+	//	q11.copyTo(tmp); q12.copyTo(q11); tmp.copyTo(q12);//右上与左下进行交换
+
+	//	imshow("R1", mRe);
+	//	imshow("I1", mIm);
+
+	//	mForFourier[0] = mRe;
+	//	mForFourier[1] = mIm;
+	//	merge(mForFourier, 2, this->mResult);//将傅里叶变换结果中心化
+	//}
+}
+
+void Processing::Fourier::FourierInverseTransform(Mat& result) {
+	// TODO: 处理输入的频域图
+
+	idft(this->mResult, result, DFT_REAL_OUTPUT);
+	result = result(Rect(0, 0, result.cols - dn, result.rows - dm));
 }
 
 Img Processing::HistogramEqualization(const Img& img) {
@@ -128,6 +222,72 @@ Img Processing::HistogramEqualization(const Img& img) {
 	equalizeHist(gray, heq);
 
 	return ConvertToImg(img, heq);
+}
+
+Mat calc_Homomorphic(Size size, float gamma_L, float gamma_H, float c, float D0) {
+	Mat result(size, CV_32FC1);
+
+	int cx = size.width / 2;
+	int cy = size.height / 2;
+
+	for (int i = 0; i < result.rows; ++i)
+	{
+		float* p = result.ptr<float>(i);
+		for (int j = 0; j < result.cols; ++j)
+		{
+			float d_2 = std::pow(i - cy, 2) + std::pow(j - cx, 2);
+			//同态滤波传递函数
+			p[j] = (gamma_H - gamma_L) * (1 - std::exp(-c * d_2 / (D0 * D0))) + gamma_L;
+		}
+	}
+
+	//创建双通道图像，便于与复数图像相乘
+	Mat planes[] = { result.clone(), result.clone() };
+	Mat Homomorphic;
+	merge(planes, 2, Homomorphic);
+
+	return Homomorphic;
+}
+
+Img Processing::HomomorphicFilter(const Img& img) {
+
+	setLogLevel(utils::logging::LOG_LEVEL_SILENT);
+	
+	// Mat img_origin = imread(img.file_path);
+	Mat img_origin = imread(img.file_path, 0);
+	if (img_origin.empty()) {
+		ExitMessage("图像读取失败");
+	}
+
+	Mat img_temp;
+	img_origin.convertTo(img_temp, CV_32F, 1 / 255.0);
+
+	// cvtColor(image, image_gray, COLOR_BGR2GRAY); //转换为灰度图
+
+	// 进行ln变换
+	log(img_temp + 1, img_temp); // 为什么必须要加 1
+
+	// 傅里叶变换
+	this->Fourier.FourierTransform(img_temp, 1);
+
+	// 滤波
+	float rh = 3, rl = 0.5, c = 5, d0 = 10; //参数
+	Mat Homomorphic = calc_Homomorphic(this->Fourier.mResult.size(), rl, rh, c, d0);
+	this->Fourier.mResult = this->Fourier.mResult.mul(Homomorphic);
+
+	// 傅里叶逆变换
+	Mat result;
+	this->Fourier.FourierInverseTransform(result);
+
+	//imshow(", ", result);
+	//waitKey(0);
+
+	//exp(result, result);  // TODO: Something wrong here!
+	normalize(result, result, 0, 1, NORM_MINMAX);
+	result.convertTo(result, CV_8U, 255);
+
+	return ConvertToImg(img, result);
+
 }
 
 void Processing::DisplayEffect(const Img& img_origin, const Img& img_processed) {
