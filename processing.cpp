@@ -213,7 +213,7 @@ Img Processing::HistogramEqualization(const Img& img) {
 
 	Mat img_origin = imread(img.file_path);
 	if (img_origin.empty()) {
-		ExitMessage("Í¼Ïñ¶ÁÈ¡Ê§°Ü");
+		ExitMessage("Í¼Ïñ¶ÁÈ¡Ê§°Ü ");
 	}
 
 	Mat gray, heq;
@@ -256,7 +256,7 @@ Img Processing::HomomorphicFilter(const Img& img) {
 	// Mat img_origin = imread(img.file_path);
 	Mat img_origin = imread(img.file_path, 0);
 	if (img_origin.empty()) {
-		ExitMessage("Í¼Ïñ¶ÁÈ¡Ê§°Ü");
+		ExitMessage("Í¼Ïñ¶ÁÈ¡Ê§°Ü ");
 	}
 
 	Mat img_temp;
@@ -552,7 +552,7 @@ int main2()
 	image = imread("data/test.bmp");  //¶ÁÈ¡Í¼Ïñ£»
 	if (image.empty())
 	{
-		cout << "¶ÁÈ¡´íÎó" << endl;
+		cout << "¶ÁÈ¡´íÎó" << '\n';
 		return -1;
 	}
 	imshow("image", image);

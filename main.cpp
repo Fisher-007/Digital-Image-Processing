@@ -1,75 +1,6 @@
-//#include <opencv2/core/core.hpp>
-//#include <opencv2/imgproc.hpp>
-//#include <opencv2/highgui/highgui.hpp>
-//#include <iostream>
-//
-//// using namespace cv;
-//using namespace std;
-//
-//
-//// 测试opencv的配置
-//void test1() {
-//	cv::Mat img = cv::imread("data/hw1.bmp");
-//	cv::namedWindow("测试" );
-//	imshow("测试", img);
-//	cv::waitKey(0);
-//	return;
-//}
-
-
 #include "img.h"
-
-// 测试Img类
-void test2() {
-	Img img("test.bmp");
-	img.DisplayImg();
-	img.SaveImg();
-}
-
-
 #include "processing.h"
-
-// 测试Processing类（傅里叶变换+直方图均衡化）
-void test3() {
-	Img img("test.bmp");
-	Processing tools;
-	// tools.DisplayEffect(img, tools.FourierTransform(img));
-	// tools.DisplayEffect(img, tools.HistogramEqualization(img));
-	tools.Fourier.FourierTransform(img);
-	tools.DisplayEffect(img, tools.Fourier.FourierInverseTransform(img));
-}
-
-
 #include "message.h"
-
-// 测试用户交互
-void test4() {
-	string location = "data/", file;
-	InputMessage("hello world", location, file);
-	cout << location + file << endl;
-}
-
-
-// 测试Processing类（几何变化部分）
-void test5() {
-	string location = "data/", file = "test.bmp";
-	//InputMessage("请输入图片所在文件夹地址（在代码同一目录data下可直接输入data/）", location);
-	//InputMessage("请输入需要处理的图片文件名", file);
-
-	Img img(file, location);
-	Processing tools;
-
-	// Mirror
-	// tools.DisplayEffect(img, tools.GeometricTransform.Mirror(img));
-
-	// Rotation
-	//tools.DisplayEffect(img, tools.GeometricTransform.Rotation(img, -30, 10, 100));
-
-	// Scaling
-	float multiple;
-	InputMessage("请输入放缩倍数（等比例放缩）", multiple);
-	tools.DisplayEffect(img, tools.GeometricTransform.Scaling(img, multiple));
-}
 
 
 void test6() {
@@ -94,7 +25,7 @@ void test6() {
 			tools.DisplayEffect(img, tools.GeometricTransform.Rotation(img, angle, rx, ry));
 			break;
 		case 3:
-			InputMessage("请输入放缩倍数（等比例放缩）", multiple);
+			InputMessage("请输入放缩倍数（等比例放缩） ", multiple);
 			tools.DisplayEffect(img, tools.GeometricTransform.Scaling(img, multiple));
 			break;
 		}
@@ -116,17 +47,24 @@ void test7() {
 }
 
 
-int main() {
-	// TODO: 控制黑窗口大小
+// #include "stdafx.h"
+#include <QtWidgets>
+#include "gui.h"
+#include <QtWidgets/QApplication>
 
-	// test1();
-	// test2();
-	// test3();
-	// test4();
-	// test5();
-	// test6();
-	// test7();
-	main2();
 
-    // TODO: 暂停，system("pause");
+// 测试用户界面
+int main(int argc, char* argv[])
+{
+	QApplication a(argc, argv);
+	GUI w;
+	w.show();
+	return a.exec();
 }
+
+
+//int main() {
+//	// test6();
+//	// test7();
+//	// main2();
+//}

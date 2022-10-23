@@ -3,7 +3,8 @@
 #define BASE_IMG_H
 
 #include <string>
-using namespace std;
+// using namespace std;
+using std::string;
 
 
 typedef unsigned char uchar;
