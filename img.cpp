@@ -22,6 +22,10 @@ void Img::set_img_type(string file) {
 	this->img_type = file.substr(pos + 1);
 }
 
+string Img::get_img_type() const {
+	return this->img_type;
+}
+
 void Img::LoadImg() {
 	switch (img_type_set[this->img_type]) {
 	case BMP:

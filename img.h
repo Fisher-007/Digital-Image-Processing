@@ -24,6 +24,7 @@ private:
 public:
 	Img();
 	Img(string file, string location = "data/");
+	string get_img_type() const;
 	// void get_img_info();
 	void LoadImg();
 	void DisplayImg(int x_offset = 0, int y_offset = 120) const;

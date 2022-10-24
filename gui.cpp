@@ -13,6 +13,6 @@ GUI::~GUI()
 {}
 
 void GUI::initImg() {
-    ImageProcessing *w = new ImageProcessing(ui.fileLineEdit->text().toStdString(), ui.locationLineEdit->text().toStdString());
+    ImageProcessing *w = new ImageProcessing(ui.fileLineEdit->text().toStdString(), ui.locationLineEdit->text().toStdString(), this);
     w->show();
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <qmessagebox.h>
 #include "ui_image_processing.h"
 #include "img.h"
 #include "processing.h"
@@ -19,6 +20,9 @@ private:
 	Ui::ImageProcessingClass ui;
 	Img img;
 	Processing tools;
-	float angle, multiple;
-	int rx, ry, mode, state;
+	int mode;
+	void set_mode();
+
+private slots:
+	void startProcessing();
 };
