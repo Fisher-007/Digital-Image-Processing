@@ -10,14 +10,17 @@ void test7() {
 	tools.DisplayEffect(img, tools.HomomorphicFilter(img));
 }
 
+void test8() {
+	Img img("lung.raw");
+	img.SaveImg();
+}
 
-//int main() {
-//	// test7();
-//	// main2();
-//	Img img("test.bmp");
-//	Processing tools;
-//	tools.GeometricTransform.Scaling(img, 1.2).SaveImg("data/temp/test.bmp");
-//}
+
+int main() {
+	// test7();
+	// main2();
+	test8();
+}
 
  #include "stdafx.h"
 #include <QtWidgets>
@@ -26,10 +29,10 @@ void test7() {
 
 
 // 测试用户界面
-int main(int argc, char* argv[])
-{
-	QApplication a(argc, argv);
-	GUI w;
-	w.show();
-	return a.exec();
-}
+//int main(int argc, char* argv[])
+//{
+//	QApplication a(argc, argv);
+//	GUI w;
+//	w.show();
+//	return a.exec();
+//}

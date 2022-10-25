@@ -8,6 +8,9 @@ using namespace cv;
 #define PI 3.1415926
 
 
+// TODO: 解决代码重用问题（不同图片数据类型不同）
+
+
 Img Processing::ConvertToImg(const Img& img, const Mat& result) {
 	Img output;
 	vector<uchar> sub_img;
@@ -345,9 +348,7 @@ Img Processing::GeometricTransform::Mirror(const Img& img) {
 	}
 
 	Img output;
-	output.bmp_info.img_data = img_data;
-	output.bmp_info.bf = img.bmp_info.bf;
-	output.bmp_info.bi = img.bmp_info.bi;
+	img.NewImgInfo(output, img_data);
 
 	return output;
 }
@@ -389,9 +390,7 @@ Img Processing::GeometricTransform::Rotation(const Img& img, float angle, int rx
 	}
 
 	Img output;
-	output.bmp_info.img_data = img_data;
-	output.bmp_info.bf = img.bmp_info.bf;
-	output.bmp_info.bi = img.bmp_info.bi;
+	img.NewImgInfo(output, img_data);
 
 	return output;
 }
@@ -447,11 +446,7 @@ Img Processing::GeometricTransform::Scaling(const Img& img, float multiple) {
 	}
 
 	Img output;
-	output.bmp_info.img_data = img_data;
-	output.bmp_info.bf = img.bmp_info.bf;
-	output.bmp_info.bi = img.bmp_info.bi;
-	output.bmp_info.bi.biWidth = width;
-	output.bmp_info.bi.biHeight = height;
+	img.NewImgInfo(output, img_data, width, height);
 
 	return output;
 }

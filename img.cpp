@@ -1,7 +1,7 @@
 #include "img.h"
 
 
-map<string, int> img_type_set = { {"bmp", 0}, {"jpg",1}, {"png", 2} };
+map<string, int> img_type_set = { {"bmp", 0}, {"jpg",1}, {"png", 2}, {"raw", 3}};
 
 
 // 用于接收图像处理过程后得到的图像数据
@@ -26,11 +26,36 @@ string Img::get_img_type() const {
 	return this->img_type;
 }
 
+
+// TODO: 拓展其他类型
+void Img::NewImgInfo(Img & output, vector<vector<uchar>> img_data, int width, int height) const {
+
+	output.bmp_info.img_data = img_data;
+	output.bmp_info.bf = this->bmp_info.bf;
+	output.bmp_info.bi = this->bmp_info.bi;
+	if (width != -1)
+		output.bmp_info.bi.biWidth = width;
+	if (height != -1)
+		output.bmp_info.bi.biHeight = height;
+}
+
+void Img::NewImgInfo(Img& output, vector<unsigned short> img_data, int width, int height) const {
+
+	output.custom_info.img_data = img_data;
+	if (width != -1)
+		output.custom_info.width = width;
+	if (height != -1)
+		output.custom_info.height = height;
+
+}
+
 void Img::LoadImg() {
 	switch (img_type_set[this->img_type]) {
 	case BMP:
 		LoadBmpImg();
-	// TODO: 拓展其他类型
+		break;
+	case CUSTOM:
+		LoadCustomImg();
 		break;
 	}
 }
@@ -39,7 +64,9 @@ void Img::DisplayImg(int x_offset, int y_offset) const {
 	switch (img_type_set[this->img_type]) {
 	case BMP:
 		DisplayBmpImg(x_offset, y_offset);
-		// TODO: 拓展其他类型
+		break;
+	case CUSTOM:
+		DisplayCustomImg(x_offset, y_offset);
 		break;
 	}
 }
@@ -48,7 +75,9 @@ void Img::SaveImg(string save_path) const {
 	switch (img_type_set[this->img_type]) {
 	case BMP:
 		SaveBmpImg(save_path);
-		// TODO: 拓展其他类型
+		break;
+	case CUSTOM:
+		SaveCustomImg(save_path);
 		break;
 	}
 }
