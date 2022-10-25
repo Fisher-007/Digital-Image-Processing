@@ -26,6 +26,13 @@ string Img::get_img_type() const {
 	return this->img_type;
 }
 
+CustomInfo Img::get_img_info() const {
+	//if (this->img_type == "bmp")
+	//	return this->bmp_info;
+	//if (this->img_type == "raw")
+		return this->custom_info;
+}
+
 
 // TODO: 拓展其他类型
 void Img::NewImgInfo(Img & output, vector<vector<uchar>> img_data, int width, int height) const {
@@ -42,6 +49,8 @@ void Img::NewImgInfo(Img & output, vector<vector<uchar>> img_data, int width, in
 void Img::NewImgInfo(Img& output, vector<unsigned short> img_data, int width, int height) const {
 
 	output.custom_info.img_data = img_data;
+	output.custom_info.width = this->custom_info.width;
+	output.custom_info.height = this->custom_info.height;
 	if (width != -1)
 		output.custom_info.width = width;
 	if (height != -1)

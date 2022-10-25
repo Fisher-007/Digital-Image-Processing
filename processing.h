@@ -43,6 +43,8 @@ public:
 		Img Scaling(const Img& img, float multiple);
 	} GeometricTransform;
 
+	Img GrayLevelWindow(const Img& img, int pos, int width);
+
 	// TODO: 颜色&&多通道拓展
 };
 

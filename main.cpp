@@ -10,17 +10,18 @@ void test7() {
 	tools.DisplayEffect(img, tools.HomomorphicFilter(img));
 }
 
+// 测试CustomImg类
 void test8() {
 	Img img("lung.raw");
 	img.SaveImg();
 }
 
 
-int main() {
-	// test7();
-	// main2();
-	test8();
-}
+//int main() {
+//	// test7();
+//	// main2();
+//	test8();
+//}
 
  #include "stdafx.h"
 #include <QtWidgets>
@@ -29,10 +30,10 @@ int main() {
 
 
 // 测试用户界面
-//int main(int argc, char* argv[])
-//{
-//	QApplication a(argc, argv);
-//	GUI w;
-//	w.show();
-//	return a.exec();
-//}
+int main(int argc, char* argv[])
+{
+	QApplication a(argc, argv);
+	GUI w;
+	w.show();
+	return a.exec();
+}
