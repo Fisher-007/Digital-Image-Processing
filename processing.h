@@ -44,6 +44,7 @@ public:
 	} GeometricTransform;
 
 	Img GrayLevelWindow(const Img& img, int pos, int width);
+	Img EnhanceDetails(const Img& img);
 
 	// TODO: 颜色&&多通道拓展
 };

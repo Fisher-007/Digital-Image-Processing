@@ -20,9 +20,10 @@ private:
 	Ui::ImageProcessingClass ui;
 	Img img;
 	Processing tools;
-	int mode;
+	int mode, counts;
 	void set_mode();
 
 private slots:
 	void startProcessing();
+	void saveImg();
 };

@@ -472,6 +472,16 @@ Img Processing::GrayLevelWindow(const Img& img, int pos, int width) {
 	return output;
 }
 
+Img Processing::EnhanceDetails(const Img& img) {
+	vector<unsigned short> img_data;
+	unsigned short temp;
+
+	Img output;
+	img.NewImgInfo(output, img_data);
+
+	return output;
+}
+
 
 void saltAndPepper(Mat& image, int n) {
 	for (int k = 0; k < n; ++k) {
