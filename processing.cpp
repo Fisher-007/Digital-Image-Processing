@@ -472,15 +472,55 @@ Img Processing::GrayLevelWindow(const Img& img, int pos, int width) {
 	return output;
 }
 
+inline unsigned short CalMediaValue(const vector<unsigned short>& data, int width, int y, int x) {
+	vector<unsigned short> list;
+	for (int i = -1; i < 2; i++)
+		for (int j = -1; j < 2; j++)
+			list.push_back(data[(y + i) * width + x + j]);
+	sort(list.begin(), list.end());
+	if (list.size() % 2 != 0)
+		return list[list.size() / 2];
+	else
+		return (list[list.size() / 2 - 1] + list[list.size() / 2]) / 2;
+}
+
+inline unsigned short CalAverageValue(const vector<unsigned short>& data, int width, int y, int x) {
+	int sum = 0;
+	for (int i = -1; i < 2; i++)
+		for (int j = -1; j < 2; j++)
+			sum += data[(y + i) * width + x + j];
+	return (unsigned short)sum / 9;
+}
+
 Img Processing::EnhanceDetails(const Img& img) {
-	vector<unsigned short> img_data;
-	unsigned short temp;
+
+	float k = 3;
+
+	int width = img.custom_info.width;
+	int height = img.custom_info.height;
+
+	vector<unsigned short> 
+		img_data = img.custom_info.img_data,
+		origin_data((height + 2) * (width + 2), 0);
+	vector<int> temp_data(img.custom_info.img_data.size());
+
+	for (int i = 0; i < height + 2; i++)
+		for (int j = 0; j < width + 2; j++)
+			if (i > 0 && i < height + 1 && j>0 && j < width + 1)
+				origin_data[i * width + j] = img.custom_info.img_data[(i - 1) * width + j - 1];
+
+	for (int i = 0; i < height + 2; i++)
+		for (int j = 0; j < width + 2; j++)
+			if (i > 0 && i < height + 1 && j>0 && j < width + 1) {
+				// temp_data[(i - 1) * width + j - 1] = origin_data[i * width + j] - CalMediaValue(origin_data, width, i, j);
+				temp_data[(i - 1) * width + j - 1] = origin_data[i * width + j] - CalAverageValue(origin_data, width, i, j);
+				img_data[(i - 1) * width + j - 1] += (unsigned short)min(65535, (int)k * max(0, temp_data[(i - 1) * width + j - 1]));
+			}
 
 	Img output;
 	img.NewImgInfo(output, img_data);
 
-	//return output;
-	return img;
+	return output;
 }
 
 

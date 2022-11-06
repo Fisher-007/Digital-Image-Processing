@@ -141,7 +141,7 @@ void ImageProcessing::saveImg() {
 		rename(path_temp.c_str(), path.c_str());
 		break;
 	case 4:
-		if (this->img.get_img_type() == path.substr(path.find_last_of("."))) {
+		if (this->img.get_img_type() == path.substr(path.find_last_of(".") + 1)) {
 			path_temp = "data/temp/4." + this->img.get_img_type();
 			rename(path_temp.c_str(), path.c_str());
 		}
