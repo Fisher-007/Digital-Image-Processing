@@ -78,9 +78,10 @@ void ImageProcessing::startProcessing() {
 		path_temp = "data/temp/2." + this->img.get_img_type();
 		tools.GeometricTransform.Scaling(img, ui.multipleLineEdit->text().toFloat()).SaveImg(path_temp);
 		break;
+		// TODO: 在这里可以继续拓展其他图像处理的情况
 	case 4:
 		img_temp = tools.EnhanceDetails(this->img);
-		img_temp.SaveImg("data/temp/4." + this->img.get_img_type());
+		// TODO: 在这里可以继续拓展其他图像处理后需要GLW的情况
 	case 3:
 		if (this->mode == 3) {
 			// 注意作用域的问题
@@ -88,8 +89,11 @@ void ImageProcessing::startProcessing() {
 			img_temp.SaveImg("data/temp/3." + this->img.get_img_type());
 		}
 		else if (this->ui.mappingCheckBox->isChecked()) {
-			img_temp = tools.GrayLevelWindow(img, ui.posLineEdit->text().toInt(), ui.widthLineEdit->text().toInt());
+			img_temp = tools.GrayLevelWindow(this->img, ui.posLineEdit->text().toInt(), ui.widthLineEdit->text().toInt());
+			img_temp.SaveImg("data/temp/" + std::to_string(this->mode) + "." + this->img.get_img_type());
 		}
+		else
+			img_temp.SaveImg("data/temp/" + std::to_string(this->mode) + "." + this->img.get_img_type());
 
 		CustomInfo img_info = img_temp.get_img_info();
 		QImage* img_dst = new QImage(img_info.width, img_info.height, QImage::Format_Grayscale8);
@@ -117,7 +121,11 @@ void ImageProcessing::startProcessing() {
 
 void ImageProcessing::saveImg() {
 	// TODO: 读取自定义地址，根据自定义输出类型对应转换图像类型，保存图像
-	string path = this->img.get_file_path() + "_output" + std::to_string(this->counts++) + "." + this->img.get_img_type(), path_temp;
+	string path, path_temp;
+	if (this->ui.pathLineEdit->text().isEmpty())
+		path = this->img.get_file_path() + "_output" + std::to_string(this->counts++) + "." + this->img.get_img_type();
+	else
+		path = this->ui.pathLineEdit->text().toStdString();
 
 	switch (this->mode) {
 	case 1:
@@ -133,8 +141,15 @@ void ImageProcessing::saveImg() {
 		rename(path_temp.c_str(), path.c_str());
 		break;
 	case 4:
-		path_temp = "data/temp/4." + this->img.get_img_type();
-		rename(path_temp.c_str(), path.c_str());
+		if (this->img.get_img_type() == path.substr(path.find_last_of("."))) {
+			path_temp = "data/temp/4." + this->img.get_img_type();
+			rename(path_temp.c_str(), path.c_str());
+		}
+		else {
+			Img img_temp("temp/4." + this->img.get_img_type());
+			img_temp.ConvertImgType("bmp");
+			img_temp.SaveImg(path);
+		}
 		break;
 	}
 }

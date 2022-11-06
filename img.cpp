@@ -44,6 +44,7 @@ void Img::NewImgInfo(Img & output, vector<vector<uchar>> img_data, int width, in
 		output.bmp_info.bi.biWidth = width;
 	if (height != -1)
 		output.bmp_info.bi.biHeight = height;
+	output.img_type = this->img_type;
 }
 
 void Img::NewImgInfo(Img& output, vector<unsigned short> img_data, int width, int height) const {
@@ -55,7 +56,7 @@ void Img::NewImgInfo(Img& output, vector<unsigned short> img_data, int width, in
 		output.custom_info.width = width;
 	if (height != -1)
 		output.custom_info.height = height;
-
+	output.img_type = this->img_type;
 }
 
 void Img::LoadImg() {
@@ -91,6 +92,55 @@ void Img::SaveImg(string save_path) const {
 	}
 }
 
-//void Img::ConvertImgType() {
-//	// TODO: 将其他常用格式的图片转换为bmp格式
-//}
+void Img::ConvertCustomToBMP() {
+	// TODO: bmp格式其他位深度的处理/调色板/补齐问题
+
+	this->bmp_info.bf.bfType = ((WORD)('M' << 8) | 'B');
+	this->bmp_info.bf.bfReserved1 = 0;
+	this->bmp_info.bf.bfReserved2 = 0;
+	this->bmp_info.bf.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) 
+		+ this->custom_info.width * this->custom_info.height * 3;
+	this->bmp_info.bf.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+	this->bmp_info.bi.biSize = sizeof(BITMAPINFOHEADER);
+	this->bmp_info.bi.biWidth = this->custom_info.width;
+	this->bmp_info.bi.biHeight = this->custom_info.height;
+	this->bmp_info.bi.biSizeImage = this->custom_info.width * this->custom_info.height * 3;
+	this->bmp_info.bi.biCompression = BI_RGB;
+	this->bmp_info.bi.biPlanes = 1;
+	this->bmp_info.bi.biBitCount = 24;
+	this->bmp_info.bi.biXPelsPerMeter = 0;
+	this->bmp_info.bi.biYPelsPerMeter = 0;
+	this->bmp_info.bi.biClrUsed = 256;
+	this->bmp_info.bi.biClrImportant = 0;
+
+	vector<vector<uchar>> img_data;
+	vector<uchar> rgb;
+	for (int y = this->bmp_info.bi.biHeight - 1; y >= 0; y--) {
+		for (int x = 0; x < this->bmp_info.bi.biWidth; x++) {
+
+			rgb.clear();
+			rgb.push_back((uchar)this->custom_info.img_data[y * this->bmp_info.bi.biWidth + x]);
+			rgb.push_back((uchar)this->custom_info.img_data[y * this->bmp_info.bi.biWidth + x]);
+			rgb.push_back((uchar)this->custom_info.img_data[y * this->bmp_info.bi.biWidth + x]);
+
+			img_data.push_back(rgb);
+		}
+	}
+
+	this->bmp_info.img_data = img_data;
+
+	this->img_type = "bmp";
+}
+
+void Img::ConvertImgType(string to_type) {
+	switch (img_type_set[this->img_type]) {
+	case BMP:
+		// BMP格式向其他图像格式转换
+		break;
+	case CUSTOM:
+		if (to_type == "bmp")
+			ConvertCustomToBMP();
+		break;
+	}
+}

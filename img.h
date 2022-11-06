@@ -20,7 +20,7 @@ class Img :public Bmp, public Custom {
 private:
 	string img_type;
 	void set_img_type(string file);
-	// void ConvertImgType();
+	void ConvertCustomToBMP();
 
 public:
 	Img();
@@ -32,6 +32,7 @@ public:
 	void SaveImg(string save_path = "") const;
 	void NewImgInfo(Img& output, vector<vector<uchar>> img_data, int width = -1, int height = -1) const;
 	void NewImgInfo(Img& output, vector<unsigned short> img_data, int width = -1, int height = -1) const;
+	void ConvertImgType(string to_type);
 	friend class Processing;
 };
 

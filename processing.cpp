@@ -479,7 +479,8 @@ Img Processing::EnhanceDetails(const Img& img) {
 	Img output;
 	img.NewImgInfo(output, img_data);
 
-	return output;
+	//return output;
+	return img;
 }
 
 
