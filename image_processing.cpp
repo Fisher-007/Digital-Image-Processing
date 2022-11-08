@@ -89,7 +89,7 @@ void ImageProcessing::startProcessing() {
 			img_temp.SaveImg("data/temp/3." + this->img.get_img_type());
 		}
 		else if (this->ui.mappingCheckBox->isChecked()) {
-			img_temp = tools.GrayLevelWindow(this->img, ui.posLineEdit->text().toInt(), ui.widthLineEdit->text().toInt());
+			img_temp = tools.GrayLevelWindow(img_temp, ui.posLineEdit->text().toInt(), ui.widthLineEdit->text().toInt());
 			img_temp.SaveImg("data/temp/" + std::to_string(this->mode) + "." + this->img.get_img_type());
 		}
 		else
@@ -137,8 +137,15 @@ void ImageProcessing::saveImg() {
 		rename(path_temp.c_str(), path.c_str());
 		break;
 	case 3:
-		path_temp = "data/temp/3." + this->img.get_img_type();
-		rename(path_temp.c_str(), path.c_str());
+		if (this->img.get_img_type() == path.substr(path.find_last_of(".") + 1)) {
+			path_temp = "data/temp/3." + this->img.get_img_type();
+			rename(path_temp.c_str(), path.c_str());
+		}
+		else {
+			Img img_temp("temp/3." + this->img.get_img_type());
+			img_temp.ConvertImgType("bmp");
+			img_temp.SaveImg(path);
+		}
 		break;
 	case 4:
 		if (this->img.get_img_type() == path.substr(path.find_last_of(".") + 1)) {

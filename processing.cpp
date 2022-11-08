@@ -492,9 +492,17 @@ inline unsigned short CalAverageValue(const vector<unsigned short>& data, int wi
 	return (unsigned short)sum / 9;
 }
 
+inline unsigned short CalAvgDisValue(const vector<unsigned short>& data, int width, int y, int x) {
+	int sum = 0;
+	for (int i = -1; i < 2; i++)
+		for (int j = -1; j < 2; j++)
+			sum += 1 / (pow(2, pow(i, 2) + pow(j, 2) + 2)) * data[(y + i) * width + x + j];
+	return (unsigned short)sum;
+}
+
 Img Processing::EnhanceDetails(const Img& img) {
 
-	float k = 3;
+	float k = 5; // 0.2，取值太大边缘效果更明显，但会出现其他问题
 
 	int width = img.custom_info.width;
 	int height = img.custom_info.height;
@@ -513,8 +521,10 @@ Img Processing::EnhanceDetails(const Img& img) {
 		for (int j = 0; j < width + 2; j++)
 			if (i > 0 && i < height + 1 && j>0 && j < width + 1) {
 				// temp_data[(i - 1) * width + j - 1] = origin_data[i * width + j] - CalMediaValue(origin_data, width, i, j);
-				temp_data[(i - 1) * width + j - 1] = origin_data[i * width + j] - CalAverageValue(origin_data, width, i, j);
-				img_data[(i - 1) * width + j - 1] += (unsigned short)min(65535, (int)k * max(0, temp_data[(i - 1) * width + j - 1]));
+				// temp_data[(i - 1) * width + j - 1] = origin_data[i * width + j] - CalAverageValue(origin_data, width, i, j);
+				temp_data[(i - 1) * width + j - 1] = origin_data[i * width + j] - CalAvgDisValue(origin_data, width, i, j);
+				// img_data[(i - 1) * width + j - 1] += (unsigned short)min(65535, (int)k * max(0, temp_data[(i - 1) * width + j - 1]));
+				img_data[(i - 1) * width + j - 1] = (unsigned short)max(0, min(65535, (int)(img_data[(i - 1) * width + j - 1] + k * temp_data[(i - 1) * width + j - 1])));
 			}
 
 	Img output;
