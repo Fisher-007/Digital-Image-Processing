@@ -332,23 +332,68 @@ vector<uchar> Processing::GeometricTransform::BilinearInterpolation(const Img& i
 	return output;
 }
 
-Img Processing::GeometricTransform::Mirror(const Img& img) {
+unsigned short Processing::GeometricTransform::BilinearInterpolation(const Img& img, float x0, float y0, int tag) {
+	int x1 = floor(x0), x2 = ceil(x0), y1 = floor(y0), y2 = ceil(y0);
+	unsigned short output;
 
-	vector<vector<uchar>> img_data(img.bmp_info.bi.biHeight * img.bmp_info.bi.biWidth);
-	for (int i = 0; i < img_data.size(); i++)
-		img_data[i].resize(3);
+	if (x1 == x0 && x0 == x2 && y1 == y0 && y0 == y2)
+		output = img.custom_info.img_data[y0 * img.custom_info.width + x0];
 
-	int x1, y1;
-	for (int y = 0; y < img.bmp_info.bi.biHeight; y++) {
-		for (int x = 0; x < img.bmp_info.bi.biWidth; x++) {
-			x1 = img.bmp_info.bi.biWidth - x - 1;
-			y1 = y;
-			img_data[y1 * img.bmp_info.bi.biWidth + x1] = img.bmp_info.img_data[y * img.bmp_info.bi.biWidth + x];
-		}
+	else if (x1 == x0 && x0 == x2) {
+		output = img.custom_info.img_data[y2 * img.custom_info.width + x0] - (y2 - y0) / (y2 - y1)
+			* (img.custom_info.img_data[y2 * img.custom_info.width + x0] - img.custom_info.img_data[y1 * img.custom_info.width + x0]);
 	}
 
+	else if (y1 == y0 && y0 == y2) {
+		output = img.custom_info.img_data[y0 * img.custom_info.width + x2] - (x2 - x0) / (x2 - x1)
+			* (img.custom_info.img_data[y0 * img.custom_info.width + x2] - img.custom_info.img_data[y0 * img.custom_info.width + x1]);
+	}
+
+	else {
+		unsigned short temp1, temp2;
+		temp1 = img.custom_info.img_data[y1 * img.custom_info.width + x2] - (x2 - x0) / (x2 - x1)
+			* (img.custom_info.img_data[y1 * img.custom_info.width + x2] - img.custom_info.img_data[y1 * img.custom_info.width + x1]);
+		temp2 = img.custom_info.img_data[y2 * img.custom_info.width + x2] - (x2 - x0) / (x2 - x1)
+			* (img.custom_info.img_data[y2 * img.custom_info.width + x2] - img.custom_info.img_data[y2 * img.custom_info.width + x1]);
+		output = temp2 - (y2 - y0) / (y2 - y1) * (temp2 - temp1);
+	}
+
+	return output;
+}
+
+Img Processing::GeometricTransform::Mirror(const Img& img) {
 	Img output;
-	img.NewImgInfo(output, img_data);
+	
+	if (img.img_type == "bmp") {
+		vector<vector<uchar>> img_data(img.bmp_info.bi.biHeight * img.bmp_info.bi.biWidth);
+		for (int i = 0; i < img_data.size(); i++)
+			img_data[i].resize(3);
+
+		int x1, y1;
+		for (int y = 0; y < img.bmp_info.bi.biHeight; y++) {
+			for (int x = 0; x < img.bmp_info.bi.biWidth; x++) {
+				x1 = img.bmp_info.bi.biWidth - x - 1;
+				y1 = y;
+				img_data[y1 * img.bmp_info.bi.biWidth + x1] = img.bmp_info.img_data[y * img.bmp_info.bi.biWidth + x];
+			}
+		}
+
+		img.NewImgInfo(output, img_data);
+	}
+	else if (img.img_type == "raw") {
+		vector<unsigned short> img_data(img.custom_info.height * img.custom_info.width);
+
+		int x1, y1;
+		for (int y = 0; y < img.custom_info.height; y++) {
+			for (int x = 0; x < img.custom_info.width; x++) {
+				x1 = img.custom_info.width - x - 1;
+				y1 = y;
+				img_data[y1 * img.custom_info.width + x1] = img.custom_info.img_data[y * img.custom_info.width + x];
+			}
+		}
+
+		img.NewImgInfo(output, img_data);
+	}
 
 	return output;
 }
@@ -396,57 +441,109 @@ Img Processing::GeometricTransform::Rotation(const Img& img, float angle, int rx
 }
 
 Img Processing::GeometricTransform::Scaling(const Img& img, float multiple) {
+	Img output;
 
-	int width, height;
-	width = round(img.bmp_info.bi.biWidth * multiple);
-	height = round(img.bmp_info.bi.biHeight * multiple);
+	if (img.img_type == "bmp") {
+		int width, height;
+		width = round(img.bmp_info.bi.biWidth * multiple);
+		height = round(img.bmp_info.bi.biHeight * multiple);
 
-	vector<vector<uchar>> img_data(width * height);
-	for (int i = 0; i < img_data.size(); i++)
-		img_data[i].resize(3, 0);
+		vector<vector<uchar>> img_data(width * height);
+		for (int i = 0; i < img_data.size(); i++)
+			img_data[i].resize(3, 0);
 
-	int x1, y1;
-	for (int y = 0; y < img.bmp_info.bi.biHeight; y++) {
+		int x1, y1;
+		for (int y = 0; y < img.bmp_info.bi.biHeight; y++) {
 
-		y1 = round(multiple * y);
+			y1 = round(multiple * y);
 
-		if (y == img.bmp_info.bi.biHeight - 1 || y1 > height - 1)
-			y1 = height - 1;
+			if (y == img.bmp_info.bi.biHeight - 1 || y1 > height - 1)
+				y1 = height - 1;
 
-		for (int x = 0; x < img.bmp_info.bi.biWidth; x++) {
+			for (int x = 0; x < img.bmp_info.bi.biWidth; x++) {
 
-			x1 = round(multiple * x);
+				x1 = round(multiple * x);
 
-			if (x == img.bmp_info.bi.biWidth - 1 || x1 > width - 1)
-				x1 = width - 1;
+				if (x == img.bmp_info.bi.biWidth - 1 || x1 > width - 1)
+					x1 = width - 1;
 
-			img_data[y1 * width + x1] = img.bmp_info.img_data[y * img.bmp_info.bi.biWidth + x];
+				img_data[y1 * width + x1] = img.bmp_info.img_data[y * img.bmp_info.bi.biWidth + x];
+			}
 		}
-	}
 
-	if (multiple > 1) {
-		float x0, y0;
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				if (img_data[y * width + x][0] == img_data[y * width + x][1] == img_data[y * width + x][2] == 0) {
+		if (multiple > 1) {
+			float x0, y0;
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (img_data[y * width + x][0] == img_data[y * width + x][1] == img_data[y * width + x][2] == 0) {
 
-					y0 = y / multiple;
-					x0 = x / multiple;
+						y0 = y / multiple;
+						x0 = x / multiple;
 
-					if (y == height - 1 || y0 > img.bmp_info.bi.biHeight - 1)
-						y0 = img.bmp_info.bi.biHeight - 1;
+						if (y == height - 1 || y0 > img.bmp_info.bi.biHeight - 1)
+							y0 = img.bmp_info.bi.biHeight - 1;
 
-					if (x == width - 1 || x0 > img.bmp_info.bi.biWidth - 1)
-						x0 = img.bmp_info.bi.biWidth - 1;
+						if (x == width - 1 || x0 > img.bmp_info.bi.biWidth - 1)
+							x0 = img.bmp_info.bi.biWidth - 1;
 
-					img_data[y * width + x] = BilinearInterpolation(img, x0, y0);
+						img_data[y * width + x] = BilinearInterpolation(img, x0, y0);
+					}
 				}
 			}
 		}
-	}
 
-	Img output;
-	img.NewImgInfo(output, img_data, width, height);
+		img.NewImgInfo(output, img_data, width, height);
+	}
+	else if (img.img_type == "raw") {
+
+		int width, height;
+		width = round(img.custom_info.width * multiple);
+		height = round(img.custom_info.height * multiple);
+
+		vector<unsigned short> img_data(width * height, 0);
+
+		int x1, y1;
+		for (int y = 0; y < img.custom_info.height; y++) {
+
+			y1 = round(multiple * y);
+
+			if (y == img.custom_info.height - 1 || y1 > height - 1)
+				y1 = height - 1;
+
+			for (int x = 0; x < img.custom_info.width; x++) {
+
+				x1 = round(multiple * x);
+
+				if (x == img.custom_info.width - 1 || x1 > width - 1)
+					x1 = width - 1;
+
+				img_data[y1 * width + x1] = img.custom_info.img_data[y * img.custom_info.width + x];
+			}
+		}
+
+		if (multiple > 1) {
+			float x0, y0;
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					if (img_data[y * width + x] == 0) {
+
+						y0 = y / multiple;
+						x0 = x / multiple;
+
+						if (y == height - 1 || y0 > img.custom_info.height - 1)
+							y0 = img.custom_info.height - 1;
+
+						if (x == width - 1 || x0 > img.custom_info.width - 1)
+							x0 = img.custom_info.width - 1;
+
+						img_data[y * width + x] = BilinearInterpolation(img, x0, y0, 1);
+					}
+				}
+			}
+		}
+
+		img.NewImgInfo(output, img_data, width, height);
+	}
 
 	return output;
 }
@@ -457,6 +554,7 @@ Img Processing::GrayLevelRevesal(const Img& img) {
 	unsigned short temp;
 	for (int i = 0; i < img.custom_info.width * img.custom_info.height; i++) {
 		temp = img.custom_info.img_data.at(i);
+		// img_data.push_back(std::numeric_limits<unsigned short>::max() - temp);
 		img_data.push_back(255 - temp);
 	}
 

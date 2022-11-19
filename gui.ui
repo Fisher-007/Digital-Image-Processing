@@ -53,6 +53,13 @@
       </layout>
      </item>
      <item>
+      <widget class="QCheckBox" name="bowserCheckBox">
+       <property name="text">
+        <string>Use DR Bowser</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
         <widget class="QPushButton" name="startButton">

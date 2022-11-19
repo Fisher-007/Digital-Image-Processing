@@ -4,6 +4,7 @@
 #define PROCESSING_H
 
 #include "img.h"
+#include <limits>
 #include <opencv2/opencv.hpp>
 using cv::Mat;
 
@@ -37,6 +38,7 @@ public:
 	class GeometricTransform {
 	private:
 		vector<uchar> BilinearInterpolation(const Img& img, float x0, float y0);
+		unsigned short BilinearInterpolation(const Img& img, float x0, float y0, int tag);
 	public:
 		Img Mirror(const Img& img);
 		Img Rotation(const Img& img, float angle, int rx = -1, int ry = -1);

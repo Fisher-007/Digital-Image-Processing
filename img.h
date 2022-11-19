@@ -21,6 +21,7 @@ private:
 	string img_type;
 	void set_img_type(string file);
 	void ConvertCustomToBMP();
+	// TODO: 统一不同类型的img_info
 
 public:
 	Img();
