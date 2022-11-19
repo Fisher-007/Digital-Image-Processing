@@ -452,6 +452,21 @@ Img Processing::GeometricTransform::Scaling(const Img& img, float multiple) {
 }
 
 
+Img Processing::GrayLevelRevesal(const Img& img) {
+	vector<unsigned short> img_data;
+	unsigned short temp;
+	for (int i = 0; i < img.custom_info.width * img.custom_info.height; i++) {
+		temp = img.custom_info.img_data.at(i);
+		img_data.push_back(255 - temp);
+	}
+
+	Img output;
+	img.NewImgInfo(output, img_data);
+
+	return output;
+}
+
+
 // TODO: 整合不同图像类型
 Img Processing::GrayLevelWindow(const Img& img, int pos, int width) {
 	vector<unsigned short> img_data;

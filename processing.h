@@ -43,6 +43,7 @@ public:
 		Img Scaling(const Img& img, float multiple);
 	} GeometricTransform;
 
+	Img GrayLevelRevesal(const Img& img);
 	Img GrayLevelWindow(const Img& img, int pos, int width);
 	Img EnhanceDetails(const Img& img);
 
